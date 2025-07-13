@@ -1,0 +1,943 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Práctica de Pseudocódigo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .code-editor {
+            font-family: 'Courier New', monospace;
+            background: #1a1a1a;
+            color: #f8f8f2;
+            border-radius: 8px;
+        }
+        
+        .syntax-highlight {
+            color: #66d9ef;
+        }
+        
+        .keyword {
+            color: #f92672;
+            font-weight: bold;
+        }
+        
+        .variable {
+            color: #a6e22e;
+        }
+        
+        .comment {
+            color: #75715e;
+            font-style: italic;
+        }
+        
+        .difficulty-easy { border-left: 4px solid #10b981; }
+        .difficulty-medium { border-left: 4px solid #f59e0b; }
+        .difficulty-hard { border-left: 4px solid #ef4444; }
+        
+        .pulse-animation {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .glass-effect {
+            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        img {
+            max-width: 40px;
+            max-height: 40px;
+            object-fit: contain;
+        }
+    </style>
+</head>
+<body class="min-h-screen gradient-bg">
+    <!-- Header -->
+    <header class="glass-effect shadow-lg sticky top-0 z-50">
+        <div class="container mx-auto px-6 py-4">
+            <div class="flex items-center justify-between">
+                <h1 class="text-3xl font-bold text-white">
+                    <span class="inline-block mr-3 w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold">
+                        &lt;/&gt;
+                    </span>
+                    Pseudocódigo Academy
+                </h1>
+                <div class="flex items-center space-x-4">
+                    <div class="text-white text-center">
+                        <div class="text-sm opacity-75">Puntuación</div>
+                        <div id="score" class="text-2xl font-bold">0</div>
+                    </div>
+                    <div class="text-white text-center">
+                        <div class="text-sm opacity-75">Ejercicios completados</div>
+                        <div id="completed" class="text-2xl font-bold">0/18</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="container mx-auto px-6 py-8">
+        <!-- Selector de dificultad -->
+        <div class="glass-effect rounded-xl p-6 mb-8">
+            <h2 class="text-2xl font-bold text-white mb-4">Selecciona el nivel de dificultad</h2>
+            <div class="flex flex-wrap gap-4">
+                <button class="difficulty-btn bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-lg transition-all duration-300 transform hover:scale-105" data-level="easy">
+                    🟢 Básico (1-6)
+                </button>
+                <button class="difficulty-btn bg-yellow-500 hover:bg-yellow-600 text-white px-6 py-3 rounded-lg transition-all duration-300 transform hover:scale-105" data-level="medium">
+                    🟡 Intermedio (7-12)
+                </button>
+                <button class="difficulty-btn bg-red-500 hover:bg-red-600 text-white px-6 py-3 rounded-lg transition-all duration-300 transform hover:scale-105" data-level="hard">
+                    🔴 Avanzado (13-18)
+                </button>
+            </div>
+        </div>
+
+        <!-- Panel principal -->
+        <div class="grid lg:grid-cols-2 gap-8">
+            <!-- Lista de ejercicios -->
+            <div class="glass-effect rounded-xl p-6">
+                <h2 class="text-2xl font-bold text-white mb-6">Ejercicios disponibles</h2>
+                <div id="exerciseList" class="space-y-4">
+                    <!-- Los ejercicios se cargarán aquí -->
+                </div>
+            </div>
+
+            <!-- Editor de código -->
+            <div class="glass-effect rounded-xl p-6">
+                <div id="exerciseDetails" class="hidden">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 id="exerciseTitle" class="text-xl font-bold text-white"></h3>
+                        <span id="exerciseDifficulty" class="px-3 py-1 rounded-full text-sm font-medium"></span>
+                    </div>
+                    
+                    <div id="exerciseDescription" class="bg-gray-800 rounded-lg p-4 mb-4 text-gray-300"></div>
+                    
+                    <div class="mb-4">
+                        <label class="block text-white text-sm font-medium mb-2">Tu solución:</label>
+                        <textarea 
+                            id="codeEditor" 
+                            class="code-editor w-full h-80 p-4 resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            placeholder="Escribe tu pseudocódigo aquí...
+
+Ejemplo:
+ALGORITMO nombre_algoritmo
+VARIABLES
+    variable: tipo
+INICIO
+    // tu código aquí
+FIN"
+                        ></textarea>
+                    </div>
+                    
+                    <div class="flex gap-4 mb-6">
+                        <button id="checkSolution" class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg transition-colors duration-300 flex items-center">
+                            <span class="mr-2">✓</span>
+                            Verificar solución
+                        </button>
+                        <button id="showHint" class="bg-purple-500 hover:bg-purple-600 text-white px-6 py-2 rounded-lg transition-colors duration-300 flex items-center">
+                            <span class="mr-2">💡</span>
+                            Mostrar pista
+                        </button>
+                        <button id="showSolution" class="bg-orange-500 hover:bg-orange-600 text-white px-6 py-2 rounded-lg transition-colors duration-300 flex items-center">
+                            <span class="mr-2">👁️</span>
+                            Ver solución
+                        </button>
+                    </div>
+                    
+                    <div id="feedback" class="hidden rounded-lg p-4 mb-4"></div>
+                    <div id="solutionDisplay" class="hidden bg-gray-800 rounded-lg p-4">
+                        <h4 class="text-white font-bold mb-2">Solución sugerida:</h4>
+                        <pre id="solutionCode" class="text-gray-300 whitespace-pre-wrap"></pre>
+                    </div>
+                </div>
+                
+                <div id="welcomeMessage" class="text-center py-16">
+                    <div class="mx-auto mb-6 w-32 h-32 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full flex items-center justify-center text-6xl">
+                        🤖
+                    </div>
+                    <h3 class="text-2xl font-bold text-white mb-4">¡Bienvenido a Pseudocódigo Academy!</h3>
+                    <p class="text-gray-300 mb-6">Selecciona un nivel de dificultad y luego un ejercicio para comenzar a practicar.</p>
+                    <div class="bg-blue-900 bg-opacity-50 rounded-lg p-4">
+                        <h4 class="text-white font-bold mb-2">💡 Consejos:</h4>
+                        <ul class="text-gray-300 text-left space-y-1">
+                            <li>• Usa palabras clave como ALGORITMO, VARIABLES, INICIO, FIN</li>
+                            <li>• Estructura tu código de forma clara y ordenada</li>
+                            <li>• No te preocupes por la sintaxis exacta, enfócate en la lógica</li>
+                            <li>• Usa comentarios para explicar pasos complejos</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Progreso general -->
+        <div class="glass-effect rounded-xl p-6 mt-8">
+            <h2 class="text-2xl font-bold text-white mb-4">Tu progreso</h2>
+            <div class="grid md:grid-cols-3 gap-6">
+                <div class="text-center">
+                    <div class="text-3xl font-bold text-green-400" id="easyProgress">0/6</div>
+                    <div class="text-gray-300">Ejercicios básicos</div>
+                    <div class="w-full bg-gray-700 rounded-full h-2 mt-2">
+                        <div id="easyProgressBar" class="bg-green-400 h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
+                    </div>
+                </div>
+                <div class="text-center">
+                    <div class="text-3xl font-bold text-yellow-400" id="mediumProgress">0/6</div>
+                    <div class="text-gray-300">Ejercicios intermedios</div>
+                    <div class="w-full bg-gray-700 rounded-full h-2 mt-2">
+                        <div id="mediumProgressBar" class="bg-yellow-400 h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
+                    </div>
+                </div>
+                <div class="text-center">
+                    <div class="text-3xl font-bold text-red-400" id="hardProgress">0/6</div>
+                    <div class="text-gray-300">Ejercicios avanzados</div>
+                    <div class="w-full bg-gray-700 rounded-full h-2 mt-2">
+                        <div id="hardProgressBar" class="bg-red-400 h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Base de datos de ejercicios
+        const exercises = {
+            easy: [
+                {
+                    id: 1,
+                    title: "Calcular área de un rectángulo",
+                    description: "Crear un algoritmo que pida al usuario la base y altura de un rectángulo, calcule su área y muestre el resultado.",
+                    hint: "Recuerda que el área de un rectángulo es base × altura. Necesitas variables para base, altura y área.",
+                    solution: `ALGORITMO area_rectangulo
+VARIABLES
+    base: real
+    altura: real
+    area: real
+
+INICIO
+    ESCRIBIR "Ingrese la base del rectángulo:"
+    LEER base
+    ESCRIBIR "Ingrese la altura del rectángulo:"
+    LEER altura
+    
+    area ← base * altura
+    
+    ESCRIBIR "El área del rectángulo es:", area
+FIN`
+                },
+                {
+                    id: 2,
+                    title: "Determinar número mayor",
+                    description: "Crear un algoritmo que lea dos números y determine cuál es el mayor.",
+                    hint: "Usa una estructura SI-ENTONCES-SINO para comparar los dos números.",
+                    solution: `ALGORITMO numero_mayor
+VARIABLES
+    num1: real
+    num2: real
+
+INICIO
+    ESCRIBIR "Ingrese el primer número:"
+    LEER num1
+    ESCRIBIR "Ingrese el segundo número:"
+    LEER num2
+    
+    SI num1 > num2 ENTONCES
+        ESCRIBIR "El mayor es:", num1
+    SINO
+        SI num2 > num1 ENTONCES
+            ESCRIBIR "El mayor es:", num2
+        SINO
+            ESCRIBIR "Los números son iguales"
+        FIN SI
+    FIN SI
+FIN`
+                },
+                {
+                    id: 3,
+                    title: "Convertir temperatura",
+                    description: "Crear un algoritmo que convierta una temperatura de Celsius a Fahrenheit. La fórmula es: F = (C × 9/5) + 32",
+                    hint: "Necesitas una variable para Celsius, otra para Fahrenheit y aplicar la fórmula de conversión.",
+                    solution: `ALGORITMO celsius_a_fahrenheit
+VARIABLES
+    celsius: real
+    fahrenheit: real
+
+INICIO
+    ESCRIBIR "Ingrese la temperatura en Celsius:"
+    LEER celsius
+    
+    fahrenheit ← (celsius * 9/5) + 32
+    
+    ESCRIBIR celsius, "°C equivale a", fahrenheit, "°F"
+FIN`
+                },
+                {
+                    id: 4,
+                    title: "Calcular promedio de 3 números",
+                    description: "Crear un algoritmo que lea tres números y calcule su promedio.",
+                    hint: "El promedio se calcula sumando todos los números y dividiendo entre la cantidad de números.",
+                    solution: `ALGORITMO promedio_tres_numeros
+VARIABLES
+    num1, num2, num3: real
+    promedio: real
+
+INICIO
+    ESCRIBIR "Ingrese el primer número:"
+    LEER num1
+    ESCRIBIR "Ingrese el segundo número:"
+    LEER num2
+    ESCRIBIR "Ingrese el tercer número:"
+    LEER num3
+    
+    promedio ← (num1 + num2 + num3) / 3
+    
+    ESCRIBIR "El promedio es:", promedio
+FIN`
+                },
+                {
+                    id: 5,
+                    title: "Calcular edad",
+                    description: "Crear un algoritmo que pida el año de nacimiento y calcule la edad actual.",
+                    hint: "Resta el año de nacimiento al año actual. Puedes usar 2024 como año actual.",
+                    solution: `ALGORITMO calcular_edad
+VARIABLES
+    anio_nacimiento: entero
+    anio_actual: entero
+    edad: entero
+
+INICIO
+    anio_actual ← 2024
+    
+    ESCRIBIR "Ingrese su año de nacimiento:"
+    LEER anio_nacimiento
+    
+    edad ← anio_actual - anio_nacimiento
+    
+    ESCRIBIR "Su edad es:", edad, "años"
+FIN`
+                },
+                {
+                    id: 6,
+                    title: "Calcular descuento",
+                    description: "Crear un algoritmo que calcule el precio final de un producto después de aplicar un descuento del 15%.",
+                    hint: "El precio final es el precio original menos el descuento. El descuento es precio × 0.15.",
+                    solution: `ALGORITMO calcular_descuento
+VARIABLES
+    precio_original: real
+    descuento: real
+    precio_final: real
+
+INICIO
+    ESCRIBIR "Ingrese el precio original del producto:"
+    LEER precio_original
+    
+    descuento ← precio_original * 0.15
+    precio_final ← precio_original - descuento
+    
+    ESCRIBIR "Descuento aplicado:", descuento
+    ESCRIBIR "Precio final:", precio_final
+FIN`
+                }
+            ],
+            medium: [
+                {
+                    id: 7,
+                    title: "Determinar si un número es par o impar",
+                    description: "Crear un algoritmo que lea un número entero y determine si es par o impar.",
+                    hint: "Un número es par si al dividirlo entre 2 el residuo es 0. Usa el operador módulo (%).",
+                    solution: `ALGORITMO par_o_impar
+VARIABLES
+    numero: entero
+
+INICIO
+    ESCRIBIR "Ingrese un número entero:"
+    LEER numero
+    
+    SI numero % 2 = 0 ENTONCES
+        ESCRIBIR numero, "es par"
+    SINO
+        ESCRIBIR numero, "es impar"
+    FIN SI
+FIN`
+                },
+                {
+                    id: 8,
+                    title: "Tabla de multiplicar",
+                    description: "Crear un algoritmo que muestre la tabla de multiplicar de un número del 1 al 10.",
+                    hint: "Usa un bucle PARA desde 1 hasta 10 y multiplica el número por cada valor del contador.",
+                    solution: `ALGORITMO tabla_multiplicar
+VARIABLES
+    numero: entero
+    i: entero
+    resultado: entero
+
+INICIO
+    ESCRIBIR "Ingrese un número:"
+    LEER numero
+    
+    ESCRIBIR "Tabla de multiplicar del", numero, ":"
+    
+    PARA i DESDE 1 HASTA 10 HACER
+        resultado ← numero * i
+        ESCRIBIR numero, " x ", i, " = ", resultado
+    FIN PARA
+FIN`
+                },
+                {
+                    id: 7,
+                    title: "Suma de números hasta N",
+                    description: "Crear un algoritmo que calcule la suma de todos los números desde 1 hasta N (donde N lo ingresa el usuario).",
+                    hint: "Usa un bucle y una variable acumuladora para ir sumando cada número.",
+                    solution: `ALGORITMO suma_hasta_n
+VARIABLES
+    n: entero
+    i: entero
+    suma: entero
+
+INICIO
+    suma ← 0
+    
+    ESCRIBIR "Ingrese un número N:"
+    LEER n
+    
+    PARA i DESDE 1 HASTA n HACER
+        suma ← suma + i
+    FIN PARA
+    
+    ESCRIBIR "La suma de números de 1 a", n, "es:", suma
+FIN`
+                },
+                {
+                    id: 8,
+                    title: "Contar dígitos de un número",
+                    description: "Crear un algoritmo que cuente cuántos dígitos tiene un número entero positivo.",
+                    hint: "Divide el número entre 10 repetidamente hasta que sea 0, contando las divisiones.",
+                    solution: `ALGORITMO contar_digitos
+VARIABLES
+    numero: entero
+    contador: entero
+
+INICIO
+    contador ← 0
+    
+    ESCRIBIR "Ingrese un número positivo:"
+    LEER numero
+    
+    SI numero = 0 ENTONCES
+        contador ← 1
+    SINO
+        MIENTRAS numero > 0 HACER
+            numero ← numero / 10
+            contador ← contador + 1
+        FIN MIENTRAS
+    FIN SI
+    
+    ESCRIBIR "El número tiene", contador, "dígitos"
+FIN`
+                },
+                {
+                    id: 9,
+                    title: "Validar contraseña",
+                    description: "Crear un algoritmo que valide si una contraseña tiene al menos 8 caracteres y contiene al menos un número.",
+                    hint: "Verifica la longitud de la cadena y busca si contiene dígitos del 0 al 9.",
+                    solution: `ALGORITMO validar_contrasena
+VARIABLES
+    contrasena: cadena
+    longitud: entero
+    tiene_numero: booleano
+    i: entero
+    caracter: caracter
+
+INICIO
+    tiene_numero ← falso
+    
+    ESCRIBIR "Ingrese una contraseña:"
+    LEER contrasena
+    
+    longitud ← LONGITUD(contrasena)
+    
+    PARA i DESDE 1 HASTA longitud HACER
+        caracter ← SUBCADENA(contrasena, i, 1)
+        SI caracter >= "0" Y caracter <= "9" ENTONCES
+            tiene_numero ← verdadero
+        FIN SI
+    FIN PARA
+    
+    SI longitud >= 8 Y tiene_numero ENTONCES
+        ESCRIBIR "Contraseña válida"
+    SINO
+        ESCRIBIR "Contraseña inválida: debe tener al menos 8 caracteres y un número"
+    FIN SI
+FIN`
+                },
+                {
+                    id: 10,
+                    title: "Contador de vocales",
+                    description: "Crear un algoritmo que cuente cuántas vocales tiene una palabra ingresada por el usuario.",
+                    hint: "Recorre cada carácter de la palabra y verifica si es una vocal (a, e, i, o, u).",
+                    solution: `ALGORITMO contar_vocales
+VARIABLES
+    palabra: cadena
+    contador_vocales: entero
+    i: entero
+    longitud: entero
+    caracter: caracter
+
+INICIO
+    contador_vocales ← 0
+    
+    ESCRIBIR "Ingrese una palabra:"
+    LEER palabra
+    
+    longitud ← LONGITUD(palabra)
+    
+    PARA i DESDE 1 HASTA longitud HACER
+        caracter ← MINUSCULA(SUBCADENA(palabra, i, 1))
+        
+        SI caracter = "a" O caracter = "e" O caracter = "i" O caracter = "o" O caracter = "u" ENTONCES
+            contador_vocales ← contador_vocales + 1
+        FIN SI
+    FIN PARA
+    
+    ESCRIBIR "La palabra", palabra, "tiene", contador_vocales, "vocales"
+FIN`
+                }
+            ],
+            hard: [
+                {
+                    id: 13,
+                    title: "Calcular factorial",
+                    description: "Crear un algoritmo que calcule el factorial de un número (n! = n × (n-1) × (n-2) × ... × 1).",
+                    hint: "Usa un bucle que multiplique desde n hasta 1, o una variable que vaya acumulando el producto.",
+                    solution: `ALGORITMO factorial
+VARIABLES
+    numero: entero
+    factorial: entero
+    i: entero
+
+INICIO
+    factorial ← 1
+    
+    ESCRIBIR "Ingrese un número positivo:"
+    LEER numero
+    
+    SI numero < 0 ENTONCES
+        ESCRIBIR "Error: el factorial no está definido para números negativos"
+    SINO
+        PARA i DESDE 1 HASTA numero HACER
+            factorial ← factorial * i
+        FIN PARA
+        
+        ESCRIBIR "El factorial de", numero, "es:", factorial
+    FIN SI
+FIN`
+                },
+                {
+                    id: 10,
+                    title: "Números primos",
+                    description: "Crear un algoritmo que determine si un número es primo (solo divisible por 1 y por sí mismo).",
+                    hint: "Un número es primo si no tiene divisores entre 2 y la raíz cuadrada del número.",
+                    solution: `ALGORITMO numero_primo
+VARIABLES
+    numero: entero
+    i: entero
+    esPrimo: booleano
+
+INICIO
+    esPrimo ← verdadero
+    
+    ESCRIBIR "Ingrese un número:"
+    LEER numero
+    
+    SI numero <= 1 ENTONCES
+        esPrimo ← falso
+    SINO
+        i ← 2
+        MIENTRAS i * i <= numero Y esPrimo HACER
+            SI numero % i = 0 ENTONCES
+                esPrimo ← falso
+            FIN SI
+            i ← i + 1
+        FIN MIENTRAS
+    FIN SI
+    
+    SI esPrimo ENTONCES
+        ESCRIBIR numero, "es primo"
+    SINO
+        ESCRIBIR numero, "no es primo"
+    FIN SI
+FIN`
+                },
+                {
+                    id: 15,
+                    title: "Secuencia de Fibonacci",
+                    description: "Generar los primeros N números de la secuencia de Fibonacci (cada número es la suma de los dos anteriores: 0, 1, 1, 2, 3, 5, 8...).",
+                    hint: "Necesitas tres variables: dos para los números anteriores y una para el siguiente. Usa un bucle para generar la secuencia.",
+                    solution: `ALGORITMO fibonacci
+VARIABLES
+    n: entero
+    i: entero
+    a, b, siguiente: entero
+
+INICIO
+    ESCRIBIR "¿Cuántos números de Fibonacci desea ver?"
+    LEER n
+    
+    SI n >= 1 ENTONCES
+        a ← 0
+        ESCRIBIR a
+    FIN SI
+    
+    SI n >= 2 ENTONCES
+        b ← 1
+        ESCRIBIR b
+    FIN SI
+    
+    PARA i DESDE 3 HASTA n HACER
+        siguiente ← a + b
+        ESCRIBIR siguiente
+        a ← b
+        b ← siguiente
+    FIN PARA
+FIN`
+                },
+                {
+                    id: 16,
+                    title: "Ordenamiento burbuja",
+                    description: "Implementar el algoritmo de ordenamiento burbuja para ordenar un array de 5 números de menor a mayor.",
+                    hint: "Compara elementos adyacentes e intercámbia si están en el orden incorrecto. Repite hasta que no haya más intercambios.",
+                    solution: `ALGORITMO ordenamiento_burbuja
+VARIABLES
+    numeros: arreglo[5] de entero
+    i, j: entero
+    temp: entero
+    intercambio: booleano
+
+INICIO
+    // Leer los números
+    PARA i DESDE 0 HASTA 4 HACER
+        ESCRIBIR "Ingrese el número", i+1, ":"
+        LEER numeros[i]
+    FIN PARA
+    
+    // Algoritmo burbuja
+    PARA i DESDE 0 HASTA 3 HACER
+        intercambio ← falso
+        PARA j DESDE 0 HASTA 3-i HACER
+            SI numeros[j] > numeros[j+1] ENTONCES
+                // Intercambiar
+                temp ← numeros[j]
+                numeros[j] ← numeros[j+1]
+                numeros[j+1] ← temp
+                intercambio ← verdadero
+            FIN SI
+        FIN PARA
+        
+        SI NO intercambio ENTONCES
+            // Ya está ordenado
+            SALIR
+        FIN SI
+    FIN PARA
+    
+    // Mostrar resultado
+    ESCRIBIR "Números ordenados:"
+    PARA i DESDE 0 HASTA 4 HACER
+        ESCRIBIR numeros[i]
+    FIN PARA
+FIN`
+                },
+                {
+                    id: 17,
+                    title: "Sistema de calificaciones",
+                    description: "Crear un algoritmo que lea las calificaciones de un estudiante y determine su promedio y letra de calificación (A: 90-100, B: 80-89, C: 70-79, D: 60-69, F: <60).",
+                    hint: "Usa estructuras SI anidadas para determinar la letra según el promedio calculado.",
+                    solution: `ALGORITMO sistema_calificaciones
+VARIABLES
+    nota1, nota2, nota3, nota4: real
+    promedio: real
+    letra: caracter
+
+INICIO
+    ESCRIBIR "Ingrese las 4 calificaciones:"
+    LEER nota1
+    LEER nota2
+    LEER nota3
+    LEER nota4
+    
+    promedio ← (nota1 + nota2 + nota3 + nota4) / 4
+    
+    SI promedio >= 90 ENTONCES
+        letra ← "A"
+    SINO
+        SI promedio >= 80 ENTONCES
+            letra ← "B"
+        SINO
+            SI promedio >= 70 ENTONCES
+                letra ← "C"
+            SINO
+                SI promedio >= 60 ENTONCES
+                    letra ← "D"
+                SINO
+                    letra ← "F"
+                FIN SI
+            FIN SI
+        FIN SI
+    FIN SI
+    
+    ESCRIBIR "Promedio:", promedio
+    ESCRIBIR "Calificación:", letra
+FIN`
+                },
+                {
+                    id: 18,
+                    title: "Buscar elemento en array",
+                    description: "Implementar una búsqueda lineal para encontrar un número específico en un array de 10 elementos y mostrar su posición.",
+                    hint: "Recorre el array elemento por elemento hasta encontrar el número buscado o llegar al final.",
+                    solution: `ALGORITMO busqueda_lineal
+VARIABLES
+    numeros: arreglo[10] de entero
+    numero_buscar: entero
+    i: entero
+    encontrado: booleano
+    posicion: entero
+
+INICIO
+    encontrado ← falso
+    posicion ← -1
+    
+    // Llenar el array
+    ESCRIBIR "Ingrese 10 números:"
+    PARA i DESDE 0 HASTA 9 HACER
+        ESCRIBIR "Número", i+1, ":"
+        LEER numeros[i]
+    FIN PARA
+    
+    ESCRIBIR "Ingrese el número a buscar:"
+    LEER numero_buscar
+    
+    // Buscar el número
+    i ← 0
+    MIENTRAS i <= 9 Y NO encontrado HACER
+        SI numeros[i] = numero_buscar ENTONCES
+            encontrado ← verdadero
+            posicion ← i + 1
+        FIN SI
+        i ← i + 1
+    FIN MIENTRAS
+    
+    SI encontrado ENTONCES
+        ESCRIBIR "Número encontrado en la posición:", posicion
+    SINO
+        ESCRIBIR "Número no encontrado en el array"
+    FIN SI
+FIN`
+                }
+            ]
+        };
+
+        // Estado de la aplicación
+        let currentExercise = null;
+        let completedExercises = new Set();
+        let score = 0;
+
+        // Elementos del DOM
+        const exerciseList = document.getElementById('exerciseList');
+        const exerciseDetails = document.getElementById('exerciseDetails');
+        const welcomeMessage = document.getElementById('welcomeMessage');
+        const exerciseTitle = document.getElementById('exerciseTitle');
+        const exerciseDifficulty = document.getElementById('exerciseDifficulty');
+        const exerciseDescription = document.getElementById('exerciseDescription');
+        const codeEditor = document.getElementById('codeEditor');
+        const feedback = document.getElementById('feedback');
+        const solutionDisplay = document.getElementById('solutionDisplay');
+        const solutionCode = document.getElementById('solutionCode');
+        
+        // Botones de dificultad
+        document.querySelectorAll('.difficulty-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const level = btn.dataset.level;
+                loadExercises(level);
+                
+                // Actualizar estados visuales
+                document.querySelectorAll('.difficulty-btn').forEach(b => b.classList.remove('ring-4', 'ring-white'));
+                btn.classList.add('ring-4', 'ring-white');
+            });
+        });
+
+        // Botones de acción
+        document.getElementById('checkSolution').addEventListener('click', checkSolution);
+        document.getElementById('showHint').addEventListener('click', showHint);
+        document.getElementById('showSolution').addEventListener('click', showSolution);
+
+        function loadExercises(level) {
+            exerciseList.innerHTML = '';
+            const levelExercises = exercises[level];
+            
+            levelExercises.forEach((exercise, index) => {
+                const isCompleted = completedExercises.has(exercise.id);
+                const difficultyClass = `difficulty-${level}`;
+                const difficultyColor = level === 'easy' ? 'green' : level === 'medium' ? 'yellow' : 'red';
+                
+                const exerciseCard = document.createElement('div');
+                exerciseCard.className = `${difficultyClass} bg-gray-800 rounded-lg p-4 cursor-pointer transition-all duration-300 hover:bg-gray-700 ${isCompleted ? 'opacity-75' : ''}`;
+                
+                exerciseCard.innerHTML = `
+                    <div class="flex items-center justify-between">
+                        <div class="flex-1">
+                            <h3 class="text-white font-bold mb-1">
+                                ${exercise.id}. ${exercise.title}
+                                ${isCompleted ? ' ✅' : ''}
+                            </h3>
+                            <p class="text-gray-400 text-sm">${exercise.description.substring(0, 80)}...</p>
+                        </div>
+                        <div class="ml-4">
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-${difficultyColor}-100 text-${difficultyColor}-800">
+                                ${level.charAt(0).toUpperCase() + level.slice(1)}
+                            </span>
+                        </div>
+                    </div>
+                `;
+                
+                exerciseCard.addEventListener('click', () => selectExercise(exercise, level));
+                exerciseList.appendChild(exerciseCard);
+            });
+        }
+
+        function selectExercise(exercise, level) {
+            currentExercise = exercise;
+            
+            // Ocultar mensaje de bienvenida y mostrar detalles
+            welcomeMessage.classList.add('hidden');
+            exerciseDetails.classList.remove('hidden');
+            
+            // Llenar detalles del ejercicio
+            exerciseTitle.textContent = `${exercise.id}. ${exercise.title}`;
+            exerciseDescription.textContent = exercise.description;
+            
+            // Configurar badge de dificultad
+            const difficultyColors = {
+                easy: 'bg-green-500 text-white',
+                medium: 'bg-yellow-500 text-white',
+                hard: 'bg-red-500 text-white'
+            };
+            exerciseDifficulty.className = `px-3 py-1 rounded-full text-sm font-medium ${difficultyColors[level]}`;
+            exerciseDifficulty.textContent = level.charAt(0).toUpperCase() + level.slice(1);
+            
+            // Limpiar editor y feedback
+            codeEditor.value = '';
+            feedback.classList.add('hidden');
+            solutionDisplay.classList.add('hidden');
+            
+            // Resaltar ejercicio seleccionado
+            document.querySelectorAll('.difficulty-easy, .difficulty-medium, .difficulty-hard').forEach(card => {
+                card.classList.remove('ring-2', 'ring-blue-500');
+            });
+            event.currentTarget.classList.add('ring-2', 'ring-blue-500');
+        }
+
+        function checkSolution() {
+            if (!currentExercise) return;
+            
+            const userCode = codeEditor.value.trim();
+            if (!userCode) {
+                showFeedback('Por favor, escribe una solución antes de verificar.', 'warning');
+                return;
+            }
+            
+            // Verificación básica de estructura
+            const hasAlgorithm = /ALGORITMO/i.test(userCode);
+            const hasVariables = /VARIABLES/i.test(userCode);
+            const hasInicio = /INICIO/i.test(userCode);
+            const hasFin = /FIN/i.test(userCode);
+            
+            let feedbackMessage = '';
+            let feedbackType = '';
+            
+            if (hasAlgorithm && hasVariables && hasInicio && hasFin) {
+                // Marcar como completado
+                if (!completedExercises.has(currentExercise.id)) {
+                    completedExercises.add(currentExercise.id);
+                    score += 10;
+                    updateProgress();
+                    feedbackMessage = '¡Excelente! Tu solución tiene la estructura correcta del pseudocódigo. ¡Ejercicio completado! 🎉';
+                    feedbackType = 'success';
+                } else {
+                    feedbackMessage = '¡Bien! Tu solución mantiene la estructura correcta. Ya habías completado este ejercicio anteriormente.';
+                    feedbackType = 'info';
+                }
+            } else {
+                let suggestions = [];
+                if (!hasAlgorithm) suggestions.push('- Añade "ALGORITMO nombre_algoritmo" al inicio');
+                if (!hasVariables) suggestions.push('- Incluye una sección "VARIABLES" con los tipos de datos');
+                if (!hasInicio) suggestions.push('- Usa "INICIO" para comenzar el código principal');
+                if (!hasFin) suggestions.push('- Termina con "FIN"');
+                
+                feedbackMessage = `Tu solución necesita algunos ajustes:\n\n${suggestions.join('\n')}`;
+                feedbackType = 'error';
+            }
+            
+            showFeedback(feedbackMessage, feedbackType);
+        }
+
+        function showHint() {
+            if (!currentExercise) return;
+            showFeedback(`💡 Pista: ${currentExercise.hint}`, 'info');
+        }
+
+        function showSolution() {
+            if (!currentExercise) return;
+            solutionCode.textContent = currentExercise.solution;
+            solutionDisplay.classList.remove('hidden');
+        }
+
+        function showFeedback(message, type) {
+            const colors = {
+                success: 'bg-green-600 border-green-500 text-white',
+                error: 'bg-red-600 border-red-500 text-white',
+                warning: 'bg-yellow-600 border-yellow-500 text-white',
+                info: 'bg-blue-600 border-blue-500 text-white'
+            };
+            
+            feedback.className = `rounded-lg p-4 mb-4 border-l-4 ${colors[type]}`;
+            feedback.innerHTML = `<div class="whitespace-pre-line">${message}</div>`;
+            feedback.classList.remove('hidden');
+        }
+
+        function updateProgress() {
+            // Actualizar puntuación y contador general
+            document.getElementById('score').textContent = score;
+            document.getElementById('completed').textContent = `${completedExercises.size}/18`;
+            
+            // Actualizar progreso por nivel
+            const easyCompleted = Array.from(completedExercises).filter(id => id <= 6).length;
+            const mediumCompleted = Array.from(completedExercises).filter(id => id >= 7 && id <= 12).length;
+            const hardCompleted = Array.from(completedExercises).filter(id => id >= 13).length;
+            
+            document.getElementById('easyProgress').textContent = `${easyCompleted}/6`;
+            document.getElementById('mediumProgress').textContent = `${mediumCompleted}/6`;
+            document.getElementById('hardProgress').textContent = `${hardCompleted}/6`;
+            
+            document.getElementById('easyProgressBar').style.width = `${(easyCompleted / 6) * 100}%`;
+            document.getElementById('mediumProgressBar').style.width = `${(mediumCompleted / 6) * 100}%`;
+            document.getElementById('hardProgressBar').style.width = `${(hardCompleted / 6) * 100}%`;
+        }
+
+        // Cargar ejercicios básicos por defecto
+        loadExercises('easy');
+        document.querySelector('[data-level="easy"]').classList.add('ring-4', 'ring-white');
+    </script>
+</body>
+</html>
+
